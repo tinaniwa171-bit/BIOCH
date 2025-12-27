@@ -2,111 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biochemistry Quiz Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Biochemistry Qbank</title>
     <style>
         :root { --primary: #2563eb; --secondary: #475569; --accent: #8b5cf6; --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --nav-bg: #ffffff; --border: #e2e8f0; }
         body.dark-mode { --primary: #60a5fa; --secondary: #94a3b8; --accent: #a78bfa; --bg: #0f172a; --card-bg: #1e293b; --text: #f8fafc; --nav-bg: #1e293b; --border: #334155; }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; padding-bottom: 2rem; }
         
         /* TOP NAV */
-        .top-nav { width: 100%; background: var(--nav-bg); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-sizing: border-box; flex-wrap: wrap; gap: 10px; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .settings-box { display: flex; gap: 0.8rem; align-items: center; }
-        .limit-input { width: 60px; padding: 0.6rem; border: 2px solid var(--border); border-radius: 8px; text-align: center; font-weight: bold; background: var(--card-bg); color: var(--text); }
+        .top-nav { width: 100%; background: var(--nav-bg); box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .settings-box { display: flex; gap: 10px; align-items: center; }
         
-        /* BUTTONS */
-        .btn { padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; color: white; transition: transform 0.1s; }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        /* INPUTS & BUTTONS */
+        .limit-input { width: 60px; padding: 0.6rem; border: 2px solid var(--border); border-radius: 8px; text-align: center; font-weight: bold; background: var(--card-bg); color: var(--text); font-size: 16px; }
+        .btn { padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; color: white; transition: opacity 0.2s; font-size: 0.95rem; white-space: nowrap; }
+        .btn:active { transform: scale(0.96); }
         .btn-order { background-color: var(--primary); }
         .btn-shuffle { background-color: var(--accent); }
         .btn-dark { background-color: var(--secondary); font-size: 1.2rem; padding: 0.4rem 0.8rem; }
 
-        /* --- 3-COLUMN LAYOUT --- */
+        /* --- MAIN LAYOUT (DESKTOP & TABLET DEFAULT) --- */
         .main-layout {
             display: flex;
-            width: 98%;
+            width: 100%;
             max-width: 1600px;
-            margin: 2rem auto;
+            margin: 1.5rem auto;
             gap: 1.5rem;
             align-items: flex-start;
-            padding: 0 1rem;
-            box-sizing: border-box;
+            padding: 0 1.5rem;
         }
 
         /* 1. LEFT SIDEBAR (SCOREBOARD) */
         .sidebar {
-            flex: 0 0 250px;
+            flex: 0 0 240px; /* Fixed width for Desktop */
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.2rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             position: sticky;
-            top: 100px;
+            top: 90px;
         }
 
-        .stat-group { display: flex; flex-direction: column; gap: 0.5rem; text-align: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .stat-group { display: flex; flex-direction: column; gap: 0.3rem; text-align: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
         .stat-group:last-child { border-bottom: none; padding-bottom: 0; }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); font-weight: 700; }
-        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); font-weight: 700; }
+        .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); }
         .stat-value.ratio { color: var(--accent); }
 
-        .score-grid { display: flex; gap: 10px; justify-content: center; }
-        .mini-score { flex: 1; background: var(--bg); padding: 0.8rem; border-radius: 8px; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); }
-        .mini-score span:first-child { font-size: 1.2rem; margin-bottom: 5px; }
+        .score-grid { display: flex; gap: 8px; justify-content: center; }
+        .mini-score { flex: 1; background: var(--bg); padding: 0.6rem; border-radius: 8px; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); }
+        .mini-score span:first-child { font-size: 1.1rem; margin-bottom: 2px; }
         .mini-score span:last-child { font-weight: 800; font-size: 1.1rem; }
         .correct-text { color: #22c55e; }
         .wrong-text { color: #ef4444; }
 
-        .jump-box { display: flex; gap: 5px; margin-top: 10px; }
-        .jump-input { flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; text-align: center; background: var(--bg); color: var(--text); }
-        .go-btn { background: var(--secondary); color: white; border: none; padding: 0 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .jump-box { display: flex; gap: 5px; margin-top: 5px; }
+        .jump-input { flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; text-align: center; background: var(--bg); color: var(--text); font-size: 16px; }
+        .go-btn { background: var(--secondary); color: white; border: none; padding: 0 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-        /* COPYRIGHT STYLE */
-        .copyright {
-            margin-top: auto; 
-            padding-top: 1rem;
-            font-size: 0.75rem;
-            color: var(--secondary);
-            text-align: center;
-            opacity: 0.6;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            border-top: 1px solid var(--border);
-        }
+        .copyright { margin-top: auto; padding-top: 1rem; font-size: 0.7rem; color: var(--secondary); text-align: center; opacity: 0.5; border-top: 1px solid var(--border); font-weight: 600; }
 
         /* 2. CENTER CONTENT (QUESTION) */
         .question-area { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
-        .card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); padding: 3rem; display: flex; flex-direction: column; }
-        .question-text { font-size: 1.4rem; font-weight: 700; margin-bottom: 2rem; line-height: 1.5; color: var(--text); }
+        .card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); padding: 2.5rem; display: flex; flex-direction: column; position: relative; }
+        .question-text { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; color: var(--text); }
         
         .options-list { display: flex; flex-direction: column; gap: 0.8rem; }
-        .option { padding: 1.2rem; background: var(--bg); border-radius: 12px; border: 2px solid var(--border); color: var(--secondary); font-size: 1.1rem; cursor: pointer; transition: all 0.2s; position: relative; }
-        .option:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); transform: translateX(5px); }
+        .option { padding: 1.2rem; background: var(--bg); border-radius: 12px; border: 2px solid var(--border); color: var(--secondary); font-size: 1.1rem; cursor: pointer; transition: all 0.1s; position: relative; user-select: none; }
+        .option:active { transform: scale(0.99); }
+        .option:hover { border-color: var(--primary); }
         
         .option.correct { background: #dcfce7; border-color: #22c55e; color: #14532d; }
         .option.wrong { background: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
-        .option.disabled { pointer-events: none; opacity: 0.7; }
+        .option.disabled { pointer-events: none; }
 
         /* 3. RIGHT SIDEBAR (EXPLANATION) */
         .explanation-sidebar {
-            flex: 0 0 350px;
-            display: none;
+            flex: 0 0 320px; /* Fixed width for Desktop */
+            display: none; /* Hidden initially */
             flex-direction: column;
-            animation: slideInRight 0.4s ease-out;
+            animation: slideIn 0.3s ease-out;
             position: sticky;
-            top: 100px;
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
+            top: 90px;
         }
 
         .explanation-card {
@@ -115,41 +100,71 @@
             border-radius: 16px;
             padding: 1.5rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            border-left: 6px solid var(--primary);
+            border-left: 5px solid var(--primary);
         }
 
-        .correct-label { color: var(--primary); font-weight: 900; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; display: block; margin-bottom: 1rem; }
-        .main-answer { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; color: var(--primary); line-height: 1.4; }
+        .correct-label { color: var(--primary); font-weight: 900; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; display: block; margin-bottom: 0.5rem; }
+        .main-answer { font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: var(--primary); line-height: 1.4; }
         .explanation { font-size: 1rem; line-height: 1.6; color: var(--text); border-top: 1px solid var(--border); padding-top: 1rem; opacity: 0.9; }
 
-        /* NAVIGATION */
-        .nav-controls { display: flex; gap: 1rem; }
-        .nav-btn { flex: 1; padding: 1.2rem; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .nav-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .nav-btn:disabled { background: var(--secondary); cursor: not-allowed; opacity: 0.5; transform: none; box-shadow: none; }
+        .nav-controls { display: flex; gap: 10px; margin-top: auto; }
+        .nav-btn { flex: 1; padding: 1rem; border-radius: 12px; border: none; background: var(--primary); color: white; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-btn:active { transform: translateY(2px); }
+        .nav-btn:disabled { background: var(--secondary); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* RESPONSIVE */
-        @media (max-width: 1200px) {
-            .main-layout { flex-wrap: wrap; }
-            .sidebar { flex: 1 1 100%; position: static; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-            .stat-group { border-bottom: none; border-right: 1px solid var(--border); padding-right: 20px; }
-            .stat-group:last-child { border-right: none; }
-            .question-area { flex: 1 1 100%; order: 2; }
-            .explanation-sidebar { flex: 1 1 100%; order: 3; position: static; width: 100%; }
-            .copyright { width: 100%; border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; }
-            .jump-box { display: none; }
+        /* --- ADAPTIVE TABLET MODE (Between 769px and 1200px) --- */
+        /* Keeps the 3-column layout but shrinks sidebars to fit smaller screens */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .main-layout { gap: 1rem; padding: 0 1rem; }
+            .sidebar { flex: 0 0 190px; padding: 1rem; } /* Shrink left sidebar */
+            .explanation-sidebar { flex: 0 0 240px; } /* Shrink right sidebar */
+            .stat-value { font-size: 1.3rem; }
+            .card { padding: 1.5rem; } /* Shrink card padding */
         }
+
+        /* --- MOBILE PHONE MODE (Below 768px) --- */
+        /* Only stacks on actual phones */
+        @media (max-width: 768px) {
+            .main-layout { flex-direction: column; align-items: stretch; gap: 1rem; margin: 1rem auto; padding: 0 1rem; }
+            
+            /* Sidebar turns into a top horizontal bar */
+            .sidebar { 
+                width: 100%; position: static; flex-direction: row; flex-wrap: wrap; 
+                justify-content: space-between; align-items: center; padding: 1rem; gap: 10px;
+                order: 1;
+            }
+            .stat-group { border: none; padding: 0; flex-direction: row; gap: 8px; align-items: center; }
+            .stat-label { display: none; }
+            .stat-value { font-size: 1.4rem; }
+            .copyright { display: none; } 
+            .jump-box { display: none; } 
+            
+            .question-area { order: 2; width: 100%; }
+            .explanation-sidebar { 
+                order: 3; width: 100%; position: static; 
+                border-left: none; margin-top: 0;
+            }
+            .explanation-card { border-left: none; border-top: 5px solid var(--primary); }
+            
+            .top-nav { padding: 0.8rem 1rem; }
+            .logo span { display: none; }
+            .limit-input { width: 50px; }
+            .btn { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+        }
+
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="top-nav">
-    <div class="logo"><span style="font-size: 1.8rem;">🧬</span> BIOCHEM QBANK</div>
+    <div class="logo"><span>🧬</span> BIOCHEM QUIZ</div>
     <div class="settings-box">
-        <button onclick="toggleTheme()" class="btn btn-dark" title="Toggle Dark Mode">🌙</button>
-        <input type="number" id="limitInput" class="limit-input" placeholder="Limit">
-        <button onclick="startSession('ordered')" class="btn btn-order">Start (Order)</button>
-        <button onclick="startSession('shuffled')" class="btn btn-shuffle">Shuffle 🔀</button>
+        <button onclick="toggleTheme()" class="btn btn-dark">🌙</button>
+        <input type="number" id="limitInput" class="limit-input" placeholder="#">
+        <button onclick="startSession('ordered')" class="btn btn-order">Start</button>
+        <button onclick="startSession('shuffled')" class="btn btn-shuffle">Shuffle</button>
     </div>
 </div>
 
@@ -157,26 +172,24 @@
     
     <aside class="sidebar">
         <div class="stat-group">
-            <span class="stat-label">Progress</span>
-            <span class="stat-value" id="progress">0 / 0</span>
+            <span class="stat-label">Q</span>
+            <span class="stat-value" id="progress">0/0</span>
         </div>
         <div class="stat-group">
-            <span class="stat-label">Accuracy</span>
+            <span class="stat-label">%</span>
             <span class="stat-value ratio" id="s-ratio">0%</span>
         </div>
         <div class="score-grid">
-            <div class="mini-score"><span>✅</span><span class="correct-text" id="s-right">0</span></div>
-            <div class="mini-score"><span>❌</span><span class="wrong-text" id="s-wrong">0</span></div>
+            <div class="mini-score"><span class="correct-text" id="s-right">0</span><span>✅</span></div>
+            <div class="mini-score"><span class="wrong-text" id="s-wrong">0</span><span>❌</span></div>
         </div>
         <div class="stat-group" style="border: none;">
-            <span class="stat-label" style="margin-bottom: 5px;">Jump to Q#</span>
             <div class="jump-box">
                 <input type="number" id="jumpInput" class="jump-input" placeholder="#">
                 <button onclick="jumpTo()" class="go-btn">Go</button>
             </div>
         </div>
-        
-        <div class="copyright">NAPASNEK 2028</div>
+        <div class="copyright">NAPASNEK PROPERTY</div>
     </aside>
 
     <main class="question-area">
@@ -189,14 +202,14 @@
         </div>
 
         <div class="nav-controls">
-            <button class="nav-btn" id="prev" onclick="move(-1)" disabled>Previous</button>
-            <button class="nav-btn" id="next" onclick="move(1)" disabled>Next Question</button>
+            <button class="nav-btn" id="prev" onclick="move(-1)" disabled>Back</button>
+            <button class="nav-btn" id="next" onclick="move(1)" disabled>Next</button>
         </div>
     </main>
 
     <aside class="explanation-sidebar" id="explanation-container">
         <div class="explanation-card">
-            <span class="correct-label">Correct Answer & Explanation</span>
+            <span class="correct-label">Explanation</span>
             <div class="main-answer" id="a-text"></div>
             <div class="explanation" id="exp-text"></div>
         </div>
@@ -3227,7 +3240,7 @@
 
     function startSession(mode) {
         if (!fullDeck || fullDeck.length === 0) {
-            alert("Error: Question list is empty! Please paste your questions.");
+            alert("Error: Question list is empty!");
             return;
         }
 
@@ -3247,6 +3260,9 @@
         score = { right: 0, wrong: 0 };
         updateScoreUI();
         render();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function render() {
@@ -3255,16 +3271,17 @@
 
         const item = currentDeck[currentIndex];
         
-        // 1. Text Content
-        document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentDeck.length}`;
+        // Text Updates
+        document.getElementById('progress').innerText = `${currentIndex + 1}/${currentDeck.length}`;
         document.getElementById('q-text').innerText = item.q;
         document.getElementById('q-text').style.textAlign = 'left';
         document.getElementById('q-text').style.color = 'var(--text)';
         
-        // 2. Hide Explanation (Right Column)
-        document.getElementById('explanation-container').style.display = 'none';
+        // Hide Explanation
+        const expContainer = document.getElementById('explanation-container');
+        expContainer.style.display = 'none';
         
-        // 3. Render Options
+        // Render Options
         const optsContainer = document.getElementById('opts');
         optsContainer.innerHTML = '';
         
@@ -3276,9 +3293,14 @@
             optsContainer.appendChild(btn);
         });
 
-        // 4. Nav Buttons
+        // Nav Buttons
         document.getElementById('prev').disabled = currentIndex === 0;
         document.getElementById('next').disabled = currentIndex === currentDeck.length - 1;
+        
+        // Scroll adjustment for Mobile Phones ONLY
+        if(window.innerWidth <= 768) {
+            document.querySelector('.main-layout').scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function checkAnswer(btnElement, selectedText, itemData) {
@@ -3306,10 +3328,18 @@
             }
         });
 
-        // POP THE RIGHT SIDEBAR
+        // Show Explanation
         document.getElementById('a-text').innerText = itemData.a;
         document.getElementById('exp-text').innerText = itemData.e;
-        document.getElementById('explanation-container').style.display = 'flex';
+        const expContainer = document.getElementById('explanation-container');
+        expContainer.style.display = 'flex';
+
+        // Auto-scroll on Mobile Phones ONLY
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                expContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
     }
 
     function move(dir) {
