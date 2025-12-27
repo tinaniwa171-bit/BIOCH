@@ -5,8 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Biochemistry Qbank</title>
     <style>
-        :root { --primary: #2563eb; --secondary: #475569; --accent: #8b5cf6; --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --nav-bg: #ffffff; --border: #e2e8f0; }
-        body.dark-mode { --primary: #60a5fa; --secondary: #94a3b8; --accent: #a78bfa; --bg: #0f172a; --card-bg: #1e293b; --text: #f8fafc; --nav-bg: #1e293b; --border: #334155; }
+        /* Retained Blue/Purple Theme from Index.html, added status colors from Physio.html */
+        :root { 
+            --primary: #2563eb; 
+            --secondary: #475569; 
+            --accent: #8b5cf6; 
+            --bg: #f1f5f9; 
+            --card-bg: #ffffff; 
+            --text: #1e293b; 
+            --nav-bg: #ffffff; 
+            --border: #e2e8f0; 
+            
+            /* Status Colors (Added for Review/Feedback logic) */
+            --danger: #ef4444; 
+            --correct-bg: #dcfce7; 
+            --correct-border: #22c55e; 
+            --wrong-bg: #fee2e2; 
+            --wrong-border: #ef4444; 
+        }
+        
+        body.dark-mode { 
+            --primary: #60a5fa; 
+            --secondary: #94a3b8; 
+            --accent: #a78bfa; 
+            --bg: #0f172a; 
+            --card-bg: #1e293b; 
+            --text: #f8fafc; 
+            --nav-bg: #1e293b; 
+            --border: #334155; 
+            
+            --danger: #f87171; 
+            --correct-bg: #064e3b; 
+            --correct-border: #34d399; 
+            --wrong-bg: #450a0a; 
+            --wrong-border: #f87171; 
+        }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; padding-bottom: 2rem; }
@@ -22,9 +55,10 @@
         .btn:active { transform: scale(0.96); }
         .btn-order { background-color: var(--primary); }
         .btn-shuffle { background-color: var(--accent); }
+        .btn-reset { background-color: var(--danger); color: white; }
         .btn-dark { background-color: var(--secondary); font-size: 1.2rem; padding: 0.4rem 0.8rem; }
 
-        /* --- MAIN LAYOUT (DESKTOP & TABLET DEFAULT) --- */
+        /* --- MAIN LAYOUT --- */
         .main-layout {
             display: flex;
             width: 100%;
@@ -35,9 +69,9 @@
             padding: 0 1.5rem;
         }
 
-        /* 1. LEFT SIDEBAR (SCOREBOARD) */
+        /* 1. LEFT SIDEBAR */
         .sidebar {
-            flex: 0 0 240px; /* Fixed width for Desktop */
+            flex: 0 0 240px;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -69,7 +103,7 @@
 
         .copyright { margin-top: auto; padding-top: 1rem; font-size: 0.7rem; color: var(--secondary); text-align: center; opacity: 0.5; border-top: 1px solid var(--border); font-weight: 600; }
 
-        /* 2. CENTER CONTENT (QUESTION) */
+        /* 2. CENTER CONTENT */
         .question-area { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
         .card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); padding: 2.5rem; display: flex; flex-direction: column; position: relative; }
@@ -80,14 +114,14 @@
         .option:active { transform: scale(0.99); }
         .option:hover { border-color: var(--primary); }
         
-        .option.correct { background: #dcfce7; border-color: #22c55e; color: #14532d; }
-        .option.wrong { background: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+        .option.correct { background: var(--correct-bg); border-color: var(--correct-border); color: var(--primary); }
+        .option.wrong { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--danger); }
         .option.disabled { pointer-events: none; }
 
-        /* 3. RIGHT SIDEBAR (EXPLANATION) */
+        /* 3. RIGHT SIDEBAR */
         .explanation-sidebar {
-            flex: 0 0 320px; /* Fixed width for Desktop */
-            display: none; /* Hidden initially */
+            flex: 0 0 320px;
+            display: none;
             flex-direction: column;
             animation: slideIn 0.3s ease-out;
             position: sticky;
@@ -112,22 +146,45 @@
         .nav-btn:active { transform: translateY(2px); }
         .nav-btn:disabled { background: var(--secondary); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* --- ADAPTIVE TABLET MODE (Between 769px and 1200px) --- */
-        /* Keeps the 3-column layout but shrinks sidebars to fit smaller screens */
+        /* --- REVIEW SECTION (NEW) --- */
+        .review-container { display: none; width: 100%; max-width: 900px; margin: 2rem auto; flex-direction: column; gap: 2rem; padding: 0 1rem; }
+        .review-header { text-align: center; margin-bottom: 1rem; }
+        .review-header h2 { font-size: 2rem; color: var(--primary); margin: 0; }
+        .review-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .review-q-text { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+        .review-status { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: inline-block; padding: 4px 8px; border-radius: 4px; }
+        .status-correct { background: var(--correct-bg); color: var(--primary); }
+        .status-wrong { background: var(--wrong-bg); color: var(--danger); }
+        .status-skipped { background: var(--bg); color: var(--secondary); }
+        
+        .review-row { display: flex; flex-direction: column; gap: 5px; font-size: 1rem; padding: 10px; border-radius: 8px; border: 1px solid transparent; }
+        .review-row.user-picked-wrong { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--danger); }
+        .review-row.correct-answer { background: var(--correct-bg); border-color: var(--correct-border); color: var(--primary); }
+        .review-label { font-size: 0.75rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; }
+
+        /* --- MODAL (NEW) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); animation: popUp 0.3s; }
+        .modal-stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 2rem; background: var(--bg); padding: 1rem; border-radius: 12px; }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-box span:first-child { font-size: 1.5rem; font-weight: 800; }
+        .stat-box span:last-child { font-size: 0.8rem; text-transform: uppercase; color: var(--secondary); font-weight: 700; }
+        
+        @keyframes popUp { from { transform: scale(0.8) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ADAPTIVE TABLET MODE --- */
         @media (min-width: 769px) and (max-width: 1200px) {
             .main-layout { gap: 1rem; padding: 0 1rem; }
-            .sidebar { flex: 0 0 190px; padding: 1rem; } /* Shrink left sidebar */
-            .explanation-sidebar { flex: 0 0 240px; } /* Shrink right sidebar */
+            .sidebar { flex: 0 0 190px; padding: 1rem; }
+            .explanation-sidebar { flex: 0 0 240px; }
             .stat-value { font-size: 1.3rem; }
-            .card { padding: 1.5rem; } /* Shrink card padding */
+            .card { padding: 1.5rem; }
         }
 
-        /* --- MOBILE PHONE MODE (Below 768px) --- */
-        /* Only stacks on actual phones */
+        /* --- MOBILE PHONE MODE --- */
         @media (max-width: 768px) {
             .main-layout { flex-direction: column; align-items: stretch; gap: 1rem; margin: 1rem auto; padding: 0 1rem; }
-            
-            /* Sidebar turns into a top horizontal bar */
             .sidebar { 
                 width: 100%; position: static; flex-direction: row; flex-wrap: wrap; 
                 justify-content: space-between; align-items: center; padding: 1rem; gap: 10px;
@@ -136,14 +193,10 @@
             .stat-group { border: none; padding: 0; flex-direction: row; gap: 8px; align-items: center; }
             .stat-label { display: none; }
             .stat-value { font-size: 1.4rem; }
-            .copyright { display: none; } 
-            .jump-box { display: none; } 
+            .copyright, .jump-box { display: none; } 
             
             .question-area { order: 2; width: 100%; }
-            .explanation-sidebar { 
-                order: 3; width: 100%; position: static; 
-                border-left: none; margin-top: 0;
-            }
+            .explanation-sidebar { order: 3; width: 100%; position: static; border-left: none; margin-top: 0; }
             .explanation-card { border-left: none; border-top: 5px solid var(--primary); }
             
             .top-nav { padding: 0.8rem 1rem; }
@@ -151,9 +204,6 @@
             .limit-input { width: 50px; }
             .btn { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
         }
-
-        /* Animations */
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -162,13 +212,14 @@
     <div class="logo"><span>🧬</span> BIOCHEM QBANK</div>
     <div class="settings-box">
         <button onclick="toggleTheme()" class="btn btn-dark">🌙</button>
+        <button onclick="resetSession()" class="btn btn-reset">Reset</button>
         <input type="number" id="limitInput" class="limit-input" placeholder="#">
         <button onclick="startSession('ordered')" class="btn btn-order">Start</button>
         <button onclick="startSession('shuffled')" class="btn btn-shuffle">Shuffle</button>
     </div>
 </div>
 
-<div class="main-layout">
+<div class="main-layout" id="quiz-interface">
     
     <aside class="sidebar">
         <div class="stat-group">
@@ -215,6 +266,46 @@
         </div>
     </aside>
 
+</div>
+
+<div class="review-container" id="review-interface">
+    <div class="review-header">
+        <h2>Quiz Summary</h2>
+        <p>Review your answers below</p>
+        <button class="btn btn-reset" onclick="resetSession()" style="margin-top:10px;">Start New Quiz</button>
+    </div>
+    <div id="review-list"></div>
+    <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn btn-order" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Back to Top ⬆️</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="congrats-modal">
+    <div class="modal-content">
+        <span style="font-size: 4rem;">🎉</span>
+        <h2 style="font-size: 2rem; color: var(--primary); margin: 10px 0;">Well Done!</h2>
+        <p style="color: var(--secondary);">You have completed the quiz.</p>
+        
+        <div class="modal-stats">
+            <div class="stat-box">
+                <span style="color: #22c55e;" id="final-right">0</span>
+                <span>Correct</span>
+            </div>
+            <div class="stat-box">
+                <span style="color: #ef4444;" id="final-wrong">0</span>
+                <span>Wrong</span>
+            </div>
+            <div class="stat-box">
+                <span style="color: var(--primary);" id="final-ratio">0%</span>
+                <span>Score</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-direction: column;">
+            <button class="btn btn-order" style="padding: 1rem;" onclick="showReviewMode()">Review Answers</button>
+            <button class="btn btn-reset" style="padding: 1rem;" onclick="resetSession()">Restart Quiz</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -3233,89 +3324,99 @@
 // ============================================
     //  APP LOGIC
     // ============================================
-    let currentDeck = [];
+
+	let currentDeck = [];
     let currentIndex = 0;
     let score = { right: 0, wrong: 0 };
     let isAnswered = false;
+    let userAnswers = {}; // Stores user's choice for each question index
 
-	    // --- LOCAL STORAGE FUNCTIONS ---
+    // --- LOCAL STORAGE FUNCTIONS ---
     function saveProgress() {
         const state = {
             deck: currentDeck,
             index: currentIndex,
-            score: score
+            score: score,
+            answers: userAnswers
         };
-        localStorage.setItem('physioQuizState', JSON.stringify(state));
+        // Use a unique key for Biochem so it doesn't clash with Physio
+        localStorage.setItem('biochemQuizState', JSON.stringify(state));
     }
 
     function loadProgress() {
-        const saved = localStorage.getItem('physioQuizState');
+        const saved = localStorage.getItem('biochemQuizState');
         if (saved) {
             const state = JSON.parse(saved);
             currentDeck = state.deck;
             currentIndex = state.index;
             score = state.score;
+            userAnswers = state.answers || {};
             return true;
         }
         return false;
+    }
+    
+    function resetSession() {
+        if(confirm("Are you sure you want to delete your progress and start over?")) {
+            localStorage.removeItem('biochemQuizState');
+            location.reload();
+        }
     }
 
     // --- INITIALIZATION ---
     window.onload = function() {
         if (loadProgress()) {
             updateScoreUI();
+            // If user finished, they stay on the last card or logic can be added to show review
             render();
         } else {
-            // Default start if no save found
-            // You can auto-start ordered or just wait for user
             document.getElementById('q-text').innerText = 'Press "Start" to begin.';
         }
     };
-	
-	function startSession(mode) {
+
+    function startSession(mode) {
         if (!fullDeck || fullDeck.length === 0) {
             alert("Error: Question list is empty!");
             return;
         }
-
         const limitInput = document.getElementById('limitInput').value;
         let limit = parseInt(limitInput);
         let tempDeck = [...fullDeck];
-
         if (mode === 'shuffled') tempDeck.sort(() => Math.random() - 0.5);
-
         if (!isNaN(limit) && limit > 0 && limit <= tempDeck.length) {
             currentDeck = tempDeck.slice(0, limit);
         } else {
             currentDeck = tempDeck;
         }
-
         currentIndex = 0;
         score = { right: 0, wrong: 0 };
+        userAnswers = {}; // Reset answers
+        
+        // Hide review, show quiz
+        document.getElementById('review-interface').style.display = 'none';
+        document.getElementById('quiz-interface').style.display = 'flex';
+        
+        saveProgress();
         updateScoreUI();
         render();
-        
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function render() {
         if (currentDeck.length === 0) return;
-        isAnswered = false;
+        
+        // Check if this specific question has been answered
+        const savedAnswer = userAnswers[currentIndex];
+        isAnswered = !!savedAnswer; // True if answered, false if not
 
         const item = currentDeck[currentIndex];
         
-        // Text Updates
         document.getElementById('progress').innerText = `${currentIndex + 1}/${currentDeck.length}`;
         document.getElementById('q-text').innerText = item.q;
         document.getElementById('q-text').style.textAlign = 'left';
         document.getElementById('q-text').style.color = 'var(--text)';
         
-        // Hide Explanation
         const expContainer = document.getElementById('explanation-container');
-        expContainer.style.display = 'none';
-        
-        // Render Options
         const optsContainer = document.getElementById('opts');
         optsContainer.innerHTML = '';
         
@@ -3323,16 +3424,35 @@
             const btn = document.createElement('div');
             btn.className = 'option';
             btn.innerText = optText;
-            btn.onclick = () => checkAnswer(btn, optText, item);
+            
+            // If already answered, apply styles immediately
+            if (isAnswered) {
+                btn.classList.add('disabled');
+                const optLetter = optText.trim().charAt(0).toUpperCase();
+                const correctLetter = item.a.trim().charAt(0).toUpperCase();
+                const userLetter = savedAnswer.trim().charAt(0).toUpperCase();
+
+                if (optLetter === correctLetter) btn.classList.add('correct');
+                if (optLetter === userLetter && userLetter !== correctLetter) btn.classList.add('wrong');
+            } else {
+                btn.onclick = () => checkAnswer(btn, optText, item);
+            }
             optsContainer.appendChild(btn);
         });
 
-        // Nav Buttons
+        // Show/Hide Explanation based on answered state
+        if (isAnswered) {
+            document.getElementById('a-text').innerText = item.a;
+            document.getElementById('exp-text').innerText = item.e;
+            expContainer.style.display = 'flex';
+        } else {
+            expContainer.style.display = 'none';
+        }
+
         document.getElementById('prev').disabled = currentIndex === 0;
         document.getElementById('next').disabled = currentIndex === currentDeck.length - 1;
         
-        // Scroll adjustment for Mobile Phones ONLY
-        if(window.innerWidth <= 768) {
+        if(window.innerWidth <= 768 && !isAnswered) {
             document.querySelector('.main-layout').scrollIntoView({ behavior: 'smooth' });
         }
     }
@@ -3341,45 +3461,39 @@
         if (isAnswered) return; 
         isAnswered = true;
 
+        // Save User's Choice
+        userAnswers[currentIndex] = selectedText;
+
         const userChoice = selectedText.trim().charAt(0).toUpperCase();
         const correctChoice = itemData.a.trim().charAt(0).toUpperCase();
         const isCorrect = (userChoice === correctChoice);
 
         if (isCorrect) score.right++;
         else score.wrong++;
-		saveProgress();
+        
+        saveProgress();
         updateScoreUI();
 
-        const allOptions = document.querySelectorAll('.option');
-        allOptions.forEach(opt => {
-            opt.classList.add('disabled');
-            const optLetter = opt.innerText.trim().charAt(0).toUpperCase();
-            
-            if (optLetter === correctChoice) {
-                opt.classList.add('correct');
-            }
-            if (!isCorrect && opt === btnElement) {
-                opt.classList.add('wrong');
-            }
-        });
+        // Update UI
+        render(); // Re-render to apply classes logic inside render()
 
-        // Show Explanation
-        document.getElementById('a-text').innerText = itemData.a;
-        document.getElementById('exp-text').innerText = itemData.e;
-        const expContainer = document.getElementById('explanation-container');
-        expContainer.style.display = 'flex';
-
-        // Auto-scroll on Mobile Phones ONLY
+        // Auto-scroll on Mobile
         if (window.innerWidth <= 768) {
             setTimeout(() => {
-                expContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('explanation-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
+        }
+
+        // Check completion
+        if (currentIndex === currentDeck.length - 1) {
+            setTimeout(showCongrats, 1000);
         }
     }
 
     function move(dir) {
         if (currentIndex + dir >= 0 && currentIndex + dir < currentDeck.length) {
             currentIndex += dir;
+            saveProgress();
             render();
         }
     }
@@ -3389,6 +3503,7 @@
         const val = parseInt(input.value);
         if (currentDeck.length > 0 && val >= 1 && val <= currentDeck.length) {
             currentIndex = val - 1;
+            saveProgress();
             render();
             input.value = '';
         }
@@ -3397,11 +3512,85 @@
     function updateScoreUI() {
         document.getElementById('s-right').innerText = score.right;
         document.getElementById('s-wrong').innerText = score.wrong;
-        
         const total = score.right + score.wrong;
         let percent = 0;
         if (total > 0) percent = Math.round((score.right / total) * 100);
         document.getElementById('s-ratio').innerText = percent + "%";
+    }
+
+    // --- CONGRATS & REVIEW LOGIC ---
+    function showCongrats() {
+        document.getElementById('final-right').innerText = score.right;
+        document.getElementById('final-wrong').innerText = score.wrong;
+        const total = score.right + score.wrong;
+        let percent = 0;
+        if (total > 0) percent = Math.round((score.right / total) * 100);
+        document.getElementById('final-ratio').innerText = percent + "%";
+        document.getElementById('congrats-modal').style.display = 'flex';
+    }
+
+    function showReviewMode() {
+        // Hide Modal
+        document.getElementById('congrats-modal').style.display = 'none';
+        
+        // Hide Main Quiz UI
+        document.getElementById('quiz-interface').style.display = 'none';
+        
+        // Show Review UI
+        const reviewContainer = document.getElementById('review-interface');
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = ''; // Clear previous
+
+        currentDeck.forEach((item, index) => {
+            const userPick = userAnswers[index]; // The text string user selected
+            const correctLetter = item.a.trim().charAt(0).toUpperCase();
+            
+            let statusClass = 'status-skipped';
+            let statusText = 'Skipped';
+            let userPickHTML = '';
+
+            if (userPick) {
+                const userLetter = userPick.trim().charAt(0).toUpperCase();
+                if (userLetter === correctLetter) {
+                    statusClass = 'status-correct';
+                    statusText = 'Correct';
+                } else {
+                    statusClass = 'status-wrong';
+                    statusText = 'Incorrect';
+                    // Show what they picked if it was wrong
+                    userPickHTML = `
+                        <div class="review-row user-picked-wrong">
+                            <div class="review-label">You Selected:</div>
+                            <div>${userPick}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.innerHTML = `
+                <div>
+                    <span class="review-status ${statusClass}">${statusText}</span>
+                    <div class="review-q-text">Q${index + 1}: ${item.q}</div>
+                </div>
+                
+                ${userPickHTML}
+
+                <div class="review-row correct-answer">
+                    <div class="review-label">Correct Answer:</div>
+                    <div>${item.a}</div>
+                </div>
+
+                <div style="font-size: 0.95rem; line-height: 1.5; color: var(--secondary); border-top: 1px solid var(--border); padding-top: 10px;">
+                    <strong>Explanation:</strong> ${item.e}
+                </div>
+            `;
+            reviewList.appendChild(card);
+        });
+
+        reviewContainer.style.display = 'flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function toggleTheme() {
@@ -3417,6 +3606,3 @@
 </script>
 </body>
 </html>
-
-
-
