@@ -3238,7 +3238,41 @@
     let score = { right: 0, wrong: 0 };
     let isAnswered = false;
 
-    function startSession(mode) {
+	    // --- LOCAL STORAGE FUNCTIONS ---
+    function saveProgress() {
+        const state = {
+            deck: currentDeck,
+            index: currentIndex,
+            score: score
+        };
+        localStorage.setItem('physioQuizState', JSON.stringify(state));
+    }
+
+    function loadProgress() {
+        const saved = localStorage.getItem('physioQuizState');
+        if (saved) {
+            const state = JSON.parse(saved);
+            currentDeck = state.deck;
+            currentIndex = state.index;
+            score = state.score;
+            return true;
+        }
+        return false;
+    }
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        if (loadProgress()) {
+            updateScoreUI();
+            render();
+        } else {
+            // Default start if no save found
+            // You can auto-start ordered or just wait for user
+            document.getElementById('q-text').innerText = 'Press "Start" to begin.';
+        }
+    };
+	
+	function startSession(mode) {
         if (!fullDeck || fullDeck.length === 0) {
             alert("Error: Question list is empty!");
             return;
@@ -3313,6 +3347,7 @@
 
         if (isCorrect) score.right++;
         else score.wrong++;
+		saveProgress();
         updateScoreUI();
 
         const allOptions = document.querySelectorAll('.option');
@@ -3382,5 +3417,6 @@
 </script>
 </body>
 </html>
+
 
 
